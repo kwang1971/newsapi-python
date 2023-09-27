@@ -5,9 +5,12 @@ import requests
 from newsapi import const
 from newsapi.newsapi_auth import NewsApiAuth
 from newsapi.newsapi_exception import NewsAPIException
-from newsapi.utils import (
-    is_valid_string, is_valid_string_or_list, stringify_date_param
-)
+from newsapi.utils import is_valid_string, is_valid_string_or_list, stringify_date_param
+
+
+# proxies = {'http': "socks5://127.0.0.1:10792",
+#             'https': "socks5://127.0.0.1:10792"}
+proxies = {"http": "http://127.0.0.1:10792", "https": "http://127.0.0.1:10792"}
 
 
 class NewsApiClient(object):
@@ -32,7 +35,15 @@ class NewsApiClient(object):
             self.request_method = session
 
     def get_top_headlines(  # noqa: C901
-        self, q=None, qintitle=None, sources=None, language=None, country=None, category=None, page_size=None, page=None
+        self,
+        q=None,
+        qintitle=None,
+        sources=None,
+        language=None,
+        country=None,
+        category=None,
+        page_size=None,
+        page=None,
     ):
         """Call the `/top-headlines` endpoint.
 
@@ -93,7 +104,9 @@ class NewsApiClient(object):
             if is_valid_string_or_list(q):
                 payload["q"] = q
             else:
-                raise TypeError("keyword/phrase q param should be of type str or list of type str")
+                raise TypeError(
+                    "keyword/phrase q param should be of type str or list of type str"
+                )
 
         # Keyword/Phrase in Title
         if qintitle is not None:
@@ -123,7 +136,6 @@ class NewsApiClient(object):
             else:
                 raise TypeError("language param should be of type str")
 
-
         # Country
         if country is not None:
             if is_valid_string(country):
@@ -150,7 +162,9 @@ class NewsApiClient(object):
                 if 0 <= page_size <= 100:
                     payload["pageSize"] = page_size
                 else:
-                    raise ValueError("page_size param should be an int between 1 and 100")
+                    raise ValueError(
+                        "page_size param should be an int between 1 and 100"
+                    )
             else:
                 raise TypeError("page_size param should be an int")
 
@@ -166,7 +180,13 @@ class NewsApiClient(object):
         if payload.get("language") is None:
             payload["language"] = const.DEFAULT_LANGUAGES.get(country)
         # Send Request
-        r = self.request_method.get(const.TOP_HEADLINES_URL, auth=self.auth, timeout=30, params=payload)
+        r = self.request_method.get(
+            const.TOP_HEADLINES_URL,
+            proxies=proxies,
+            auth=self.auth,
+            timeout=30,
+            params=payload,
+        )
 
         # Check Status of Request
         if r.status_code != requests.codes.ok:
@@ -253,7 +273,9 @@ class NewsApiClient(object):
             if is_valid_string_or_list(q):
                 payload["q"] = q
             else:
-                raise TypeError("keyword/phrase q param should be of type str or list of type str")
+                raise TypeError(
+                    "keyword/phrase q param should be of type str or list of type str"
+                )
 
         # Keyword/Phrase in Title
         if qintitle is not None:
@@ -316,7 +338,9 @@ class NewsApiClient(object):
                 if 0 <= page_size <= 100:
                     payload["pageSize"] = page_size
                 else:
-                    raise ValueError("page_size param should be an int between 1 and 100")
+                    raise ValueError(
+                        "page_size param should be an int between 1 and 100"
+                    )
             else:
                 raise TypeError("page_size param should be an int")
 
@@ -331,8 +355,14 @@ class NewsApiClient(object):
                 raise TypeError("page param should be an int")
 
         # Send Request
-        r = self.request_method.get(const.EVERYTHING_URL, auth=self.auth, timeout=30, params=payload)
-        
+        r = self.request_method.get(
+            const.EVERYTHING_URL,
+            proxies=proxies,
+            auth=self.auth,
+            timeout=30,
+            params=payload,
+        )
+
         # Check Status of Request
         if r.status_code != requests.codes.ok:
             raise NewsAPIException(r.json())
@@ -396,7 +426,9 @@ class NewsApiClient(object):
         # Send Request
         if payload.get("language") is None:
             payload["language"] = const.DEFAULT_LANGUAGES.get(country)
-        r = self.request_method.get(const.SOURCES_URL, auth=self.auth, timeout=30, params=payload)
+        r = self.request_method.get(
+            const.SOURCES_URL, proxies=proxies, auth=self.auth, timeout=30, params=payload
+        )
 
         # Check Status of Request
         if r.status_code != requests.codes.ok:
